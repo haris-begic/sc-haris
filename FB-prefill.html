@@ -1,0 +1,44 @@
+<!-- Step: 1 : Use Liquid to check for logged User and pass data to JavaScript
+
+Step: 2 : Add JavaScript to prefill the form in the iFrame
+
+Step: 3 : Handle the data in Form Builder (JavaScript Box) --> 
+
+
+{% if customer %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            window.customerData = {
+                firstName: "{{ customer.first_name | escape }}",
+                lastName: "{{ customer.last_name | escape }}",
+                email: "{{ customer.email | escape }}"
+            };
+            if (window.customerData) {
+                // Replace with real iframe ID here
+                var formIframe = document.getElementById('iFrameID');
+                if (formIframe && formIframe.contentWindow) {
+                    formIframe.onload = function() {
+                        // Send the customer data to the iframe
+                        formIframe.contentWindow.postMessage({
+                            action: 'prefillForm',
+                            data: window.customerData
+                        }, '*');
+                    };
+                }
+            }
+        });
+    </script>
+{% endif %}
+
+<script>
+
+window.addEventListener('message', function(event) {
+    if (event.data && event.data.action === 'prefillForm') {
+        var customerData = event.data.data;
+        document.getElementById('form_input_0').value = customerData.firstName;
+        document.getElementById('form_input_1').value = customerData.lastName;
+        document.getElementById('form_input_2').value = customerData.email;
+    }
+}, false);
+
+</script>
